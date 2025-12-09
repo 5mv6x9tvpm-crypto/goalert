@@ -1,0 +1,1493 @@
+type IntegrationKeyTypeInfo {
+  id: ID!
+
+  """
+  User-displayable name of the integration key type.
+  """
+  name: String!
+
+  """
+  User-displayable description of the integration key value (i.e., copy/paste instructions).
+  """
+  label: String!
+
+  """
+  Indicates if the type is currently enabled.
+  """
+  enabled: Boolean!
+}
+
+type SWOStatus {
+  state: SWOState!
+  lastStatus: String!
+  lastError: String!
+
+  nodes: [SWONode!]!
+
+  mainDBVersion: String!
+  nextDBVersion: String!
+}
+
+enum SWOState {
+  unknown
+  resetting
+  idle
+  syncing
+  pausing
+  executing
+  done
+}
+
+type SWONode {
+  id: ID!
+
+  canExec: Boolean!
+  isLeader: Boolean!
+
+  """
+  The uptime of the node in seconds. Empty if the node/connection is *not* a GoAlert instance in SWO mode.
+  """
+  uptime: String!
+
+  configError: String!
+  connections: [SWOConnection!]
+}
+
+type SWOConnection {
+  name: String!
+  version: String!
+  type: String!
+  isNext: Boolean!
+  count: Int!
+}
+
+type LinkAccountInfo {
+  userDetails: String!
+  alertID: Int
+  alertNewStatus: AlertStatus
+}
+
+input AlertMetricsOptions {
+  rInterval: ISORInterval!
+
+  filterByServiceID: [ID!]
+}
+
+type AlertDataPoint {
+  timestamp: ISOTimestamp!
+  alertCount: Int!
+}
+
+input DebugMessagesInput {
+  first: Int = 15
+  createdBefore: ISOTimestamp
+  createdAfter: ISOTimestamp
+}
+
+type DebugMessage {
+  id: ID!
+  createdAt: ISOTimestamp!
+  updatedAt: ISOTimestamp!
+  type: String!
+  status: String!
+  userID: ID
+  userName: String
+  source: String
+  destination: String!
+  serviceID: ID
+  serviceName: String
+  alertID: Int
+  providerID: ID
+  sentAt: ISOTimestamp
+  retryCount: Int!
+}
+
+input MessageLogSearchOptions {
+  first: Int = 50
+  after: String = ""
+  createdBefore: ISOTimestamp
+  createdAfter: ISOTimestamp
+  search: String = ""
+  omit: [ID!]
+}
+
+type MessageLogConnection {
+  nodes: [DebugMessage!]!
+  pageInfo: PageInfo!
+
+  stats: MessageLogConnectionStats!
+}
+
+type MessageLogConnectionStats {
+  timeSeries(input: TimeSeriesOptions!): [TimeSeriesBucket!]!
+}
+
+input TimeSeriesOptions {
+  bucketDuration: ISODuration!
+  bucketOrigin: ISOTimestamp
+}
+
+type TimeSeriesBucket {
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+
+  count: Int!
+    @deprecated(reason: "Use value instead.")
+    @goField(forceResolver: true)
+
+  value: Float!
+}
+
+input SlackUserGroupSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+}
+
+type SlackUserGroup {
+  id: ID!
+  name: String!
+  handle: String!
+}
+
+type SlackUserGroupConnection {
+  nodes: [SlackUserGroup!]!
+  pageInfo: PageInfo!
+}
+
+input SlackChannelSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+}
+
+type SlackChannel {
+  id: ID!
+  name: String!
+  teamID: String!
+}
+
+type SlackChannelConnection {
+  nodes: [SlackChannel!]!
+  pageInfo: PageInfo!
+}
+
+type SystemLimit {
+  id: SystemLimitID!
+  description: String!
+  value: Int!
+}
+
+input SystemLimitInput {
+  id: SystemLimitID!
+  value: Int!
+}
+
+type ConfigValue {
+  id: String!
+  description: String!
+  value: String!
+  type: ConfigType!
+  password: Boolean!
+  deprecated: String!
+}
+
+type ConfigHint {
+  id: String!
+  value: String!
+}
+
+enum ConfigType {
+  string
+  stringList
+  integer
+  boolean
+}
+
+enum SystemLimitID {
+  CalendarSubscriptionsPerUser
+  NotificationRulesPerUser
+  ContactMethodsPerUser
+  EPStepsPerPolicy
+  EPActionsPerStep
+  ParticipantsPerRotation
+  RulesPerSchedule
+  IntegrationKeysPerService
+  UnackedAlertsPerService
+  TargetsPerSchedule
+  HeartbeatMonitorsPerService
+  UserOverridesPerSchedule
+}
+
+input UserOverrideSearchOptions {
+  first: Int = 15
+  after: String = ""
+  omit: [ID!]
+
+  """
+  Limit search to a single schedule
+  """
+  scheduleID: ID
+
+  """
+  Only return overrides where the provided users have been added to a schedule (add or replace types).
+  """
+  filterAddUserID: [ID!]
+
+  """
+  Only return overrides where the provided users have been removed from a schedule (remove or replace types).
+  """
+  filterRemoveUserID: [ID!]
+
+  """
+  Only return overrides that add/remove/replace at least one of the provided user IDs.
+  """
+  filterAnyUserID: [ID!]
+
+  """
+  Start of the window to search for.
+  """
+  start: ISOTimestamp
+
+  """
+  End of the window to search for.
+  """
+  end: ISOTimestamp
+}
+
+type UserOverrideConnection {
+  nodes: [UserOverride!]!
+  pageInfo: PageInfo!
+}
+
+type IntegrationKeyConnection {
+  nodes: [IntegrationKey!]!
+  pageInfo: PageInfo!
+}
+
+type UserOverride {
+  id: ID!
+
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+
+  addUserID: ID!
+  removeUserID: ID!
+
+  addUser: User
+  removeUser: User
+
+  target: Target!
+}
+
+input LabelSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  uniqueKeys: Boolean = false
+  omit: [ID!]
+}
+
+input LabelKeySearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [String!]
+}
+
+input LabelValueSearchOptions {
+  key: String!
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [String!]
+}
+
+input IntegrationKeySearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [String!]
+}
+
+type LabelConnection {
+  nodes: [Label!]!
+  pageInfo: PageInfo!
+}
+
+type StringConnection {
+  nodes: [String!]!
+  pageInfo: PageInfo!
+}
+
+type PhoneNumberInfo {
+  id: String!
+  countryCode: String!
+  regionCode: String!
+  formatted: String!
+  valid: Boolean!
+  error: String!
+}
+
+type DebugCarrierInfo {
+  name: String!
+  type: String!
+  mobileNetworkCode: String!
+  mobileCountryCode: String!
+}
+
+input DebugCarrierInfoInput {
+  number: String!
+}
+
+input DebugSendSMSInput {
+  from: String!
+  to: String!
+  body: String!
+}
+
+type DebugSendSMSInfo {
+  id: ID!
+  providerURL: String!
+  fromNumber: String!
+}
+
+input DebugMessageStatusInput {
+  providerMessageID: ID!
+}
+
+type DebugMessageStatusInfo {
+  state: NotificationState!
+}
+
+type TemporarySchedule {
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+
+  shifts: [OnCallShift!]!
+}
+
+input ClearTemporarySchedulesInput {
+  scheduleID: ID!
+
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+}
+
+input SetTemporaryScheduleInput {
+  scheduleID: ID!
+
+  clearStart: ISOTimestamp
+  clearEnd: ISOTimestamp
+
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+
+  shifts: [SetScheduleShiftInput!]!
+}
+
+input SetScheduleShiftInput {
+  userID: ID!
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+}
+
+enum SWOAction {
+  reset
+  execute
+}
+
+input CreateBasicAuthInput {
+  username: String!
+  password: String!
+  userID: ID!
+}
+
+input UpdateBasicAuthInput {
+  password: String!
+  oldPassword: String
+  userID: ID!
+}
+
+input UpdateAlertsByServiceInput {
+  serviceID: ID!
+  newStatus: AlertStatus!
+}
+
+input AlertMetadataInput {
+  key: String!
+  value: String!
+}
+
+input CreateAlertInput {
+  summary: String!
+  details: String
+  serviceID: ID!
+
+  """
+  If true, summary and details will be automatically sanitized and truncated (if necessary).
+  """
+  sanitize: Boolean
+
+  """
+  Dedup allows setting a unique value to de-duplicate multiple alerts.
+
+  It can also be used to close an alert using closeMatchingAlert mutation.
+  """
+  dedup: String
+
+  meta: [AlertMetadataInput!]
+}
+
+input CloseMatchingAlertInput {
+  serviceID: ID!
+
+  """
+  Summary (and details) will match an alert with the same values.
+
+  They can be omitted if the dedup field is provided.
+  """
+  summary: String
+  details: String
+
+  """
+  Preferred over providing the summary & details.
+  """
+  dedup: String
+}
+
+input SetAlertNoiseReasonInput {
+  alertID: Int!
+  noiseReason: String!
+}
+
+input CreateUserInput {
+  username: String!
+  password: String!
+  name: String
+  email: String
+  role: UserRole
+  favorite: Boolean
+}
+
+input CreateUserCalendarSubscriptionInput {
+  name: String!
+  reminderMinutes: [Int!]
+  scheduleID: ID!
+  disabled: Boolean
+  fullSchedule: Boolean
+}
+
+input UpdateUserCalendarSubscriptionInput {
+  id: ID!
+  name: String
+  reminderMinutes: [Int!]
+  disabled: Boolean
+  fullSchedule: Boolean
+}
+
+type UserCalendarSubscription {
+  id: ID!
+  name: String!
+  reminderMinutes: [Int!]!
+  fullSchedule: Boolean!
+  scheduleID: ID!
+  schedule: Schedule
+  lastAccess: ISOTimestamp!
+  disabled: Boolean!
+
+  """
+  Subscription url, only available upon creation.
+  """
+  url: String
+}
+
+input ConfigValueInput {
+  id: String!
+  value: String!
+}
+
+input UpdateUserOverrideInput {
+  id: ID!
+
+  start: ISOTimestamp
+  end: ISOTimestamp
+
+  addUserID: ID
+  removeUserID: ID
+}
+
+input CreateUserOverrideInput {
+  scheduleID: ID
+
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+
+  addUserID: ID
+  removeUserID: ID
+}
+
+input CreateScheduleInput {
+  name: String!
+  description: String
+  timeZone: String!
+  favorite: Boolean
+
+  targets: [ScheduleTargetInput!]
+  newUserOverrides: [CreateUserOverrideInput!]
+}
+
+input ScheduleTargetInput {
+  scheduleID: ID
+  target: TargetInput
+  newRotation: CreateRotationInput
+  rules: [ScheduleRuleInput!]!
+}
+
+input ScheduleRuleInput {
+  id: ID
+  start: ClockTime
+  end: ClockTime
+
+  """
+  Weekday filter is a 7-item array that indicates if the rule is active on each weekday, starting with Sunday.
+  """
+  weekdayFilter: WeekdayFilter
+}
+
+input SetLabelInput {
+  target: TargetInput
+  key: String!
+
+  """
+  If value is empty, the label is removed.
+  """
+  value: String!
+}
+
+input TimeZoneSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+}
+
+type TimeZoneConnection {
+  nodes: [TimeZone!]!
+  pageInfo: PageInfo!
+}
+
+type TimeZone {
+  id: String!
+}
+
+input CreateServiceInput {
+  name: String!
+  description: String = ""
+
+  favorite: Boolean
+
+  escalationPolicyID: ID
+  newEscalationPolicy: CreateEscalationPolicyInput
+  newIntegrationKeys: [CreateIntegrationKeyInput!]
+  labels: [SetLabelInput!]
+  newHeartbeatMonitors: [CreateHeartbeatMonitorInput!]
+}
+
+input CreateEscalationPolicyInput {
+  name: String!
+  description: String = ""
+  repeat: Int = 3
+
+  favorite: Boolean
+
+  steps: [CreateEscalationPolicyStepInput!]
+}
+
+input CreateEscalationPolicyStepInput {
+  escalationPolicyID: ID
+
+  delayMinutes: Int!
+
+  targets: [TargetInput!]
+    @goField(forceResolver: true)
+    @deprecated(reason: "use actions instead")
+  newRotation: CreateRotationInput
+  newSchedule: CreateScheduleInput
+}
+
+type EscalationPolicyStep {
+  id: ID!
+  stepNumber: Int!
+  delayMinutes: Int!
+  targets: [Target!]!
+    @goField(forceResolver: true)
+    @deprecated(reason: "use actions instead")
+  escalationPolicy: EscalationPolicy
+}
+
+input UpdateScheduleInput {
+  id: ID!
+  name: String
+  description: String
+  timeZone: String
+}
+
+input UpdateServiceInput {
+  id: ID!
+  name: String
+  description: String
+  escalationPolicyID: ID
+  maintenanceExpiresAt: ISOTimestamp
+}
+
+input UpdateEscalationPolicyInput {
+  id: ID!
+  name: String
+  description: String
+  repeat: Int
+  stepIDs: [String!]
+}
+
+input UpdateEscalationPolicyStepInput {
+  id: ID!
+  delayMinutes: Int
+  targets: [TargetInput!]
+    @goField(forceResolver: true)
+    @deprecated(reason: "use actions instead")
+}
+
+input SetFavoriteInput {
+  target: TargetInput!
+  favorite: Boolean!
+}
+
+type EscalationPolicyConnection {
+  nodes: [EscalationPolicy!]!
+  pageInfo: PageInfo!
+}
+
+type AlertConnection {
+  nodes: [Alert!]!
+  pageInfo: PageInfo!
+}
+
+type ScheduleConnection {
+  nodes: [Schedule!]!
+  pageInfo: PageInfo!
+}
+
+type Schedule {
+  id: ID!
+  name: String!
+  description: String!
+  timeZone: String!
+
+  assignedTo: [Target!]!
+  shifts(
+    start: ISOTimestamp!
+    end: ISOTimestamp!
+    userIDs: [ID!]
+  ): [OnCallShift!]!
+
+  targets: [ScheduleTarget!]!
+  target(input: TargetInput!): ScheduleTarget
+  isFavorite: Boolean!
+
+  temporarySchedules: [TemporarySchedule!]!
+  onCallNotificationRules: [OnCallNotificationRule!]!
+}
+
+input SetScheduleOnCallNotificationRulesInput {
+  scheduleID: ID!
+  rules: [OnCallNotificationRuleInput!]!
+}
+
+input OnCallNotificationRuleInput {
+  id: ID
+
+  """
+  Target is required if dest is unset
+  """
+  target: TargetInput
+    @goField(forceResolver: true)
+    @deprecated(reason: "use dest instead")
+
+  dest: DestinationInput
+
+  """
+  Time indicates a time-of-day (in the schedule's time zone) to send a message of current on-call users.
+
+  If time is null, a notification will be sent any time the set of on-call users changes for this schedule.
+  """
+  time: ClockTime
+
+  """
+  Weekday filter indicates which days of the week this rule is evaluated.
+
+  It is required for time-of-day notifications and must be null if time is null.
+  """
+  weekdayFilter: WeekdayFilter
+}
+
+type OnCallNotificationRule {
+  id: ID!
+  target: Target!
+    @goField(forceResolver: true)
+    @deprecated(reason: "use dest instead")
+  dest: Destination!
+  time: ClockTime
+  weekdayFilter: WeekdayFilter
+}
+
+type OnCallShift {
+  userID: ID!
+  user: User
+  start: ISOTimestamp!
+  end: ISOTimestamp!
+  truncated: Boolean!
+}
+
+type ScheduleTarget {
+  scheduleID: ID!
+  target: Target!
+  rules: [ScheduleRule!]!
+}
+
+type ScheduleRule {
+  id: ID! @deprecated(reason: "no longer used")
+  scheduleID: ID!
+
+  start: ClockTime!
+  end: ClockTime!
+
+  """
+  Weekday filter is a 7-item array that indicates if the rule is active on each weekday, starting with Sunday.
+  """
+  weekdayFilter: WeekdayFilter!
+
+  target: Target!
+}
+
+type RotationConnection {
+  nodes: [Rotation!]!
+  pageInfo: PageInfo!
+}
+
+input CreateRotationInput {
+  name: String!
+  description: String
+
+  timeZone: String!
+  start: ISOTimestamp!
+  favorite: Boolean
+
+  type: RotationType!
+  shiftLength: Int = 1
+
+  userIDs: [ID!]
+}
+
+type Rotation {
+  id: ID!
+  name: String!
+  description: String!
+  isFavorite: Boolean!
+
+  start: ISOTimestamp!
+  timeZone: String!
+
+  type: RotationType!
+  shiftLength: Int!
+
+  activeUserIndex: Int!
+
+  userIDs: [ID!]!
+  users: [User!]!
+
+  nextHandoffTimes(num: Int): [ISOTimestamp!]!
+}
+
+enum RotationType {
+  monthly
+  weekly
+  daily
+  hourly
+}
+
+input UpdateAlertsInput {
+  """
+  List of alert IDs.
+  """
+  alertIDs: [Int!]!
+
+  newStatus: AlertStatus
+  noiseReason: String
+}
+
+input UpdateRotationInput {
+  id: ID!
+
+  name: String
+  description: String
+  timeZone: String
+  start: ISOTimestamp
+  type: RotationType
+  shiftLength: Int
+
+  userIDs: [ID!]
+
+  """
+  The index of the user in `userIDs` to set as the active user. If not provided, the existing active user index will be used.
+  """
+  activeUserIndex: Int
+}
+
+input RotationSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+
+  """
+  Include only favorited rotations in the results.
+  """
+  favoritesOnly: Boolean = false
+
+  """
+  Sort favorite rotations first.
+  """
+  favoritesFirst: Boolean = false
+}
+
+input CalcRotationHandoffTimesInput {
+  handoff: ISOTimestamp!
+  from: ISOTimestamp
+  timeZone: String!
+
+  """
+  Only accurate for hourly-type rotations. Use shiftLength instead.
+  """
+  shiftLengthHours: Int @deprecated(reason: "Use shiftLength instead.")
+
+  shiftLength: ISODuration
+  count: Int!
+}
+
+input EscalationPolicySearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+
+  """
+  Include only favorited escalation policies in the results.
+  """
+  favoritesOnly: Boolean = false
+
+  """
+  Sort favorite escalation policies first.
+  """
+  favoritesFirst: Boolean = false
+}
+
+input ScheduleSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+
+  """
+  Include only favorited services in the results.
+  """
+  favoritesOnly: Boolean = false
+
+  """
+  Sort favorite services first.
+  """
+  favoritesFirst: Boolean = false
+}
+
+input ServiceSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+  only: [ID!]
+
+  """
+  Include only favorited services in the results.
+  """
+  favoritesOnly: Boolean = false
+
+  """
+  Sort favorite services first.
+  """
+  favoritesFirst: Boolean = false
+}
+
+input UserSearchOptions {
+  first: Int = 15
+  after: String = ""
+  search: String = ""
+  omit: [ID!]
+  CMValue: String = ""
+  CMType: ContactMethodType
+  dest: DestinationInput
+
+  """
+  Include only favorited services in the results.
+  """
+  favoritesOnly: Boolean = false
+
+  """
+  Sort favorite services first.
+  """
+  favoritesFirst: Boolean = false
+}
+
+input AlertSearchOptions {
+  filterByStatus: [AlertStatus!]
+  filterByServiceID: [ID!]
+  search: String = ""
+  first: Int = 15
+  after: String = ""
+  favoritesOnly: Boolean = false
+  includeNotified: Boolean = false
+  omit: [Int!]
+  sort: AlertSearchSort = statusID
+  createdBefore: ISOTimestamp
+  notCreatedBefore: ISOTimestamp
+  closedBefore: ISOTimestamp
+  notClosedBefore: ISOTimestamp
+}
+
+enum AlertSearchSort {
+  statusID
+  dateID
+  dateIDReverse
+}
+
+"""
+An ISODuration is an RFC3339-formatted duration string.
+"""
+scalar ISODuration
+
+"""
+An ISORInterval is an RFC3339-formatted repeating interval string.
+"""
+scalar ISORInterval
+
+"""
+An ISOTimestamp is an RFC3339-formatted timestamp string.
+"""
+scalar ISOTimestamp
+
+"""
+ClockTime is a 24-hour time in the format 00:00.
+"""
+scalar ClockTime
+
+"""
+WeekdayFilter is an array of 7 true/false values representing days of the week.
+The first index (0) represents Sunday.
+"""
+scalar WeekdayFilter
+
+type Alert {
+  id: ID!
+  alertID: Int!
+  status: AlertStatus!
+  summary: String!
+  details: String!
+  createdAt: ISOTimestamp!
+  serviceID: ID!
+  service: Service
+
+  """
+  Escalation Policy State for the alert.
+  """
+  state: AlertState
+
+  """
+  Recent log entries for the alert.
+  """
+  recentEvents(input: AlertRecentEventsOptions): AlertLogEntryConnection!
+
+  pendingNotifications: [AlertPendingNotification!]!
+
+  """
+  Metrics are only available for closed alerts.
+  """
+  metrics: AlertMetric
+
+  noiseReason: String
+
+  meta: [AlertMetadata!]
+
+  metaValue(key: String!): String!
+}
+
+type AlertMetric {
+  escalated: Boolean!
+  closedAt: ISOTimestamp!
+  timeToAck: ISODuration!
+  timeToClose: ISODuration!
+}
+
+type AlertPendingNotification {
+  destination: String!
+}
+
+input AlertRecentEventsOptions {
+  limit: Int
+  after: String = ""
+  since: ISOTimestamp
+}
+
+type AlertLogEntryConnection {
+  nodes: [AlertLogEntry!]!
+  pageInfo: PageInfo!
+}
+
+type AlertLogEntry {
+  """
+  The unique ID of the log entry.
+  """
+  id: Int!
+
+  """
+  The ID of the alert this log entry is associated with.
+  """
+  alertID: Int!
+  timestamp: ISOTimestamp!
+  message: String!
+  state: NotificationState
+
+  """
+  If the log entry represents a notification, this will be the ID of the notification.
+  """
+  messageID: ID
+}
+
+type NotificationState {
+  details: String!
+  status: NotificationStatus
+  formattedSrcValue: String!
+}
+
+enum NotificationStatus {
+  OK
+  WARN
+  ERROR
+}
+
+type AlertState {
+  lastEscalation: ISOTimestamp!
+  stepNumber: Int!
+  repeatCount: Int!
+}
+
+type AlertMetadata {
+  key: String!
+  value: String!
+}
+
+type Service {
+  id: ID!
+  name: String!
+  description: String!
+  escalationPolicyID: ID!
+  escalationPolicy: EscalationPolicy
+  isFavorite: Boolean!
+  maintenanceExpiresAt: ISOTimestamp
+
+  onCallUsers: [ServiceOnCallUser!]!
+  integrationKeys: [IntegrationKey!]!
+  labels: [Label!]!
+  heartbeatMonitors: [HeartbeatMonitor!]!
+
+  notices: [Notice!]!
+
+  """
+  Recent log entries for all alerts belonging to the service.
+  """
+  recentEvents(input: AlertRecentEventsOptions): AlertLogEntryConnection!
+}
+
+input CreateIntegrationKeyInput {
+  serviceID: ID
+  type: IntegrationKeyType!
+  name: String!
+
+  """
+  Name of the external system this key is managed by.
+  """
+  externalSystemName: String
+}
+
+input CreateHeartbeatMonitorInput {
+  serviceID: ID
+  name: String!
+  timeoutMinutes: Int!
+  additionalDetails: String
+
+  """
+  If non-empty, the monitor will be muted with this reason.
+
+  Muting a monitor will prevent it from triggering new alerts, but existing
+  alerts will remain active until closed or the monitor is healthy again.
+  """
+  muted: String
+}
+
+input UpdateHeartbeatMonitorInput {
+  id: ID!
+  name: String
+  timeoutMinutes: Int
+  additionalDetails: String
+
+  """
+  If non-empty, the monitor will be muted with this reason.
+
+  Muting a monitor will prevent it from triggering new alerts, but existing
+  alerts will remain active until closed or the monitor is healthy again.
+  """
+  muted: String
+}
+
+enum HeartbeatMonitorState {
+  inactive
+  healthy
+  unhealthy
+}
+
+type HeartbeatMonitor {
+  id: ID!
+  serviceID: ID!
+  name: String!
+  timeoutMinutes: Int!
+  lastState: HeartbeatMonitorState!
+  lastHeartbeat: ISOTimestamp
+  href: String!
+  additionalDetails: String!
+
+  """
+  If non-empty, the monitor is muted with this reason.
+
+  Muted monitors will not trigger new alerts, but will operate normally otherwise.
+  """
+  muted: String!
+}
+
+type Label {
+  key: String!
+  value: String!
+}
+
+type IntegrationKey {
+  id: ID!
+  serviceID: ID!
+  type: IntegrationKeyType!
+  name: String!
+  href: String!
+
+  """
+  Name of the external system this key is managed by.
+  """
+  externalSystemName: String
+}
+
+enum IntegrationKeyType {
+  generic
+  grafana
+  site24x7
+  prometheusAlertmanager
+  email
+  universal
+}
+
+type ServiceOnCallUser {
+  userID: ID!
+  userName: String!
+  stepNumber: Int!
+}
+
+type EscalationPolicy {
+  id: ID!
+  name: String!
+  description: String!
+  repeat: Int!
+  isFavorite: Boolean!
+
+  assignedTo: [Target!]!
+  steps: [EscalationPolicyStep!]!
+
+  notices: [Notice!]!
+}
+
+enum AlertStatus {
+  StatusAcknowledged
+  StatusClosed
+  StatusUnacknowledged
+}
+
+type Target {
+  id: ID!
+  type: TargetType!
+  name: String!
+}
+
+input TargetInput {
+  id: ID!
+  type: TargetType!
+}
+
+enum TargetType {
+  escalationPolicy
+  notificationChannel
+  slackChannel
+  slackUserGroup
+  notificationPolicy
+  rotation
+  service
+  schedule
+  user
+  chanWebhook
+  integrationKey
+  userOverride
+  notificationRule
+  contactMethod
+  heartbeatMonitor
+  calendarSubscription
+  userSession
+}
+
+type ServiceConnection {
+  nodes: [Service!]!
+  pageInfo: PageInfo!
+}
+
+type UserConnection {
+  nodes: [User!]!
+  pageInfo: PageInfo!
+}
+
+type AuthSubjectConnection {
+  nodes: [AuthSubject!]!
+  pageInfo: PageInfo!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+input UpdateUserInput {
+  id: ID!
+  name: String
+  email: String
+  role: UserRole
+
+  statusUpdateContactMethodID: ID
+    @deprecated(
+      reason: "Use `UpdateUserContactMethodInput.enableStatusUpdates` instead."
+    )
+}
+
+input AuthSubjectInput {
+  userID: ID!
+  providerID: ID!
+  subjectID: ID!
+}
+
+enum UserRole {
+  unknown
+  user
+  admin
+}
+
+type User {
+  id: ID!
+
+  role: UserRole!
+
+  """
+  The user's configured name.
+  """
+  name: String!
+
+  """
+  Email of the user.
+  """
+  email: String!
+
+  contactMethods: [UserContactMethod!]!
+  notificationRules: [UserNotificationRule!]!
+  calendarSubscriptions: [UserCalendarSubscription!]!
+
+  statusUpdateContactMethodID: ID!
+    @deprecated(reason: "Use `UserContactMethod.statusUpdates` instead.")
+
+  authSubjects: [AuthSubject!]!
+  sessions: [UserSession!]!
+
+  onCallSteps: [EscalationPolicyStep!]!
+    @deprecated(reason: "Use `onCallOverview` instead.")
+
+  onCallOverview: OnCallOverview!
+
+  isFavorite: Boolean!
+
+  assignedSchedules: [Schedule!]!
+}
+
+type UserSession {
+  id: ID!
+  current: Boolean!
+  userAgent: String!
+  createdAt: ISOTimestamp!
+  lastAccessAt: ISOTimestamp!
+}
+
+type UserNotificationRule {
+  id: ID!
+  delayMinutes: Int!
+
+  contactMethodID: ID!
+  contactMethod: UserContactMethod
+}
+
+type OnCallOverview {
+  serviceCount: Int!
+  serviceAssignments: [OnCallServiceAssignment!]!
+}
+
+type OnCallServiceAssignment {
+  """
+  Step number is the escalation step this assignment is from (beginning with 0).
+  """
+  stepNumber: Int!
+
+  escalationPolicyID: ID!
+  escalationPolicyName: String!
+
+  serviceID: ID!
+  serviceName: String!
+}
+
+enum ContactMethodType {
+  SMS
+  VOICE
+  EMAIL
+  WEBHOOK
+  SLACK_DM
+}
+
+type UserContactMethod {
+  id: ID!
+  type: ContactMethodType
+    @deprecated(reason: "Use dest instead.")
+    @goField(forceResolver: true)
+
+  dest: Destination!
+
+  """
+  User-defined label for this contact method.
+  """
+  name: String!
+  value: String!
+    @deprecated(reason: "Use dest instead.")
+    @goField(forceResolver: true)
+  formattedValue: String! @deprecated(reason: "Use dest.displayInfo instead.")
+  disabled: Boolean!
+  pending: Boolean!
+
+  lastTestVerifyAt: ISOTimestamp
+  lastTestMessageState: NotificationState
+  lastVerifyMessageState: NotificationState
+
+  statusUpdates: StatusUpdateState!
+}
+
+enum StatusUpdateState {
+  DISABLED
+  ENABLED
+  ENABLED_FORCED
+  DISABLED_FORCED
+}
+
+input CreateUserContactMethodInput {
+  userID: ID!
+
+  type: ContactMethodType @deprecated(reason: "Use dest instead.")
+
+  dest: DestinationInput
+
+  name: String!
+
+  """
+  Only value or dest should be used at a time, never both.
+  """
+  value: String @deprecated(reason: "Use dest instead.")
+
+  newUserNotificationRule: CreateUserNotificationRuleInput
+
+  """
+  If true, this contact method will receive status updates.
+
+  Note: Some contact method types, like Slack, will always receive status updates and this value is ignored.
+  """
+  enableStatusUpdates: Boolean
+}
+
+input CreateUserNotificationRuleInput {
+  userID: ID
+  contactMethodID: ID
+  delayMinutes: Int!
+}
+
+input UpdateUserContactMethodInput {
+  id: ID!
+  name: String
+  value: String
+    @deprecated(
+      reason: "Updating value is not supported, delete and create a new contact method instead."
+    )
+
+  """
+  If true, this contact method will receive status updates.
+
+  Note: Some contact method types, like Slack, will always receive status updates and this value is ignored.
+  """
+  enableStatusUpdates: Boolean
+}
+
+input SendContactMethodVerificationInput {
+  contactMethodID: ID!
+}
+
+input VerifyContactMethodInput {
+  contactMethodID: ID!
+  code: Int!
+}
+
+type AuthSubject {
+  providerID: ID!
+  subjectID: ID!
+  userID: ID!
+}
+
+type Notice {
+  type: NoticeType!
+  message: String!
+  details: String!
+}
+
+enum NoticeType {
+  WARNING
+  ERROR
+  INFO
+}

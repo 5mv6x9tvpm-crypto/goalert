@@ -1,0 +1,11 @@
+extend type EscalationPolicyStep {
+  actions: [Destination!]!
+}
+
+extend input CreateEscalationPolicyStepInput {
+  actions: [DestinationInput!]
+}
+
+extend input UpdateEscalationPolicyStepInput {
+  actions: [DestinationInput!]
+}

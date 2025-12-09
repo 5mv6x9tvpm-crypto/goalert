@@ -1,0 +1,9 @@
+{
+  "id": "b38b22b4-38d6-474b-8224-3f9c1d942888",
+  "name": "Cypress User",
+  "email": "cy-smoketest@example.com",
+  "role": "user",
+  "username": "cysmoketest",
+  "password": "hunter2",
+  "passwordHash": "$2y$04$KfvjkXmDPYhrmSukrJWQ.OmmeofzMkJA8SPmkQL2lUOxE8fXwu9LG"
+}
